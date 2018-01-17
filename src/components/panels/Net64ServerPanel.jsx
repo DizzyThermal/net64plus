@@ -12,6 +12,14 @@ import { disconnect, setConnection } from '../../actions/connection'
 const CHARACTER_IMAGES = [
   'mario.png', 'luigi.png', 'yoshi.png', 'wario.png', 'peach.png', 'toad.png', 'waluigi.png', 'rosalina.png'
 ]
+const COURSE_IMAGES = {
+   4: "05-bbh.png",     5: "04-ccm.png",    6: "00-castle.png", 7: "06-hmc.png",      8: "08-ssl.png",   9: "01-bob.png",
+  10: "10-sl.png",     11: "11-wdw.png",   12: "03-jrb.png",    13: "13-thi.png",    14: "14-ttc.png",  15: "15-rr.png",
+  16: "00-castle.png", 17: "16-bitdw.png", 18: "22-vanish.png", 19: "17-bitfs.png",  20: "24-aqua.png", 21: "18-bits.png",
+  22: "07-lll.png",    23: "09-ddd.png",   24: "02-wf.png",     26: "00-castle.png", 27: "19-pss.png",  28: "20-metal.png",
+  29: "21-wing.png",   30: "16-bitdw.png", 31: "23-sky.png",    33: "17-bitfs.png",  34: "18-bits.png", 36: "12-ttm.png",
+  99: "99-unknown.png"
+}
 
 class Net64ServerPanel extends React.PureComponent {
   constructor (props) {
@@ -25,6 +33,7 @@ class Net64ServerPanel extends React.PureComponent {
     this.onConnect = this.onConnect.bind(this)
     this.onDisconnect = this.onDisconnect.bind(this)
     this.renderPlayers = this.renderPlayers.bind(this)
+    this.playerCourseIds = Array.apply(null, Array(24)).map(Number.prototype.valueOf, 99)
   }
   componentDidMount () {
     if (this.props.server.description) {
@@ -98,10 +107,17 @@ class Net64ServerPanel extends React.PureComponent {
       borderTop: '1px solid black',
       display: 'flex'
     }
+    var playerCourseIds = undefined
+    if (typeof this.props.connection !== 'undefined' && this.props.connection !== null) {
+        playerCourseIds = this.props.connection.playerCourseIds
+    } else {
+        playerCourseIds = Array.apply(null, Array(24)).map(Number.prototype.valueOf, 99)
+    }
     return players.map(
       (player, index) =>
         player
           ? <div style={style} key={index}>
+            <img src={`img/courses/${COURSE_IMAGES[playerCourseIds[index]]}`} />
             <img src={`img/${CHARACTER_IMAGES[player.characterId]}`} />
             <div>
               { player.username }
@@ -248,5 +264,6 @@ class Net64ServerPanel extends React.PureComponent {
 export default connect(state => ({
   emulator: state.get('emulator'),
   username: state.getIn(['save', 'data', 'username']),
-  characterId: state.getIn(['save', 'data', 'character'])
+  characterId: state.getIn(['save', 'data', 'character']),
+  connection: state.getIn(['connection', 'connection']),
 }))(Net64ServerPanel)

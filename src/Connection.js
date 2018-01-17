@@ -9,6 +9,8 @@ import { store } from './renderer'
 import { disconnect, setConnectionError } from './actions/connection'
 
 const UPDATE_INTERVAL = 24
+const PLAYER_ID = 0x3
+const COURSE_ID = 0xF
 const EMPTY = new Uint8Array(0x18)
 const DECODER = new TextDecoder('utf-8')
 const ENCODER = new TextEncoder('utf-8')
@@ -26,6 +28,7 @@ export default class Connection {
     this.emulator = emulator
     this.chat = new Chat()
     this.hasError = false
+    this.playerCourseIds = Array.apply(null, Array(24)).map(Number.prototype.valueOf, 99)
   }
   disconnect () {
     this.ws.close()
@@ -71,6 +74,9 @@ export default class Connection {
         for (let i = 0; i < payload.length; i += 0x18) {
           if (this.playerId === payload[i + 3]) continue
           payload.writeUInt8(j, i + 3)
+          const playerId = payload.slice(i, i + 0x18)[PLAYER_ID]
+          const courseId = payload.slice(i, i + 0x18)[COURSE_ID]
+          this.playerCourseIds[playerId] = courseId
           this.emulator.writeMemory(0x367700 + 0x100 * j, payload.slice(i, i + 0x18))
           j++
         }
